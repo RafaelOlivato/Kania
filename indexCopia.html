@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrada de Dados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #messageBox {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 4em;
+            text-align: center;
+            margin-bottom: 1em;
+        }
+
+        #alert{
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 1em;
+        }
+
+
+        #timer {
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Entrada de Dados</h1>
+    <div class="form-group">
+        <input type="date" id="data" required>
+        <input type="time" id="hora" required>
+        <input type="number" id="pbLivre" placeholder="%Pb-livre" required>
+        <input type="number" id="densidade" placeholder="Densidade" required>
+        <select id="silo">
+            <option value="Silo 1">Moinho-1</option>
+            <option value="Silo 2">Moinho-2</option>
+            <option value="Silo 3">Moinho-3</option>
+        </select>
+        <button id="submitButton">Salvar Dados</button>
+        <button onclick="window.location.href='historico.html'">Ver Histórico</button>
+    </div>
+
+    <div id="messageBox"></div>
+    <div id="alert"></div>
+    <div id="timer"></div>
+
+    <script>
+        document.getElementById('submitButton').addEventListener('click', function () {
+            const data = document.getElementById('data').value;
+            const hora = document.getElementById('hora').value;
+            const pbLivre = parseFloat(document.getElementById('pbLivre').value);
+            const densidade = parseFloat(document.getElementById('densidade').value);
+            const silo = document.getElementById('silo').value;
+
+            // Verifica se todos os campos estão preenchidos
+            if (!data || !hora || isNaN(pbLivre) || isNaN(densidade) || !silo) {
+                alert("Por favor, preencha todos os campos!");
+                return; // Não continua se algum campo estiver vazio
+            }
+
+            const newEntry = {
+                data,
+                hora,
+                pbLivre,
+                densidade,
+                silo
+            };
+
+            const historicalData = JSON.parse(localStorage.getItem('historicalData')) || [];
+            historicalData.push(newEntry);
+            localStorage.setItem('historicalData', JSON.stringify(historicalData));
+
+            // Lógica de controle para %Pb-livre e Densidade
+            let message = '';
+            let alertActions = '';
+            let timerDuration = 0;
+            let displayTimer = false;
+
+            // Lógica combinada para %Pb-livre e densidade
+
+            if(pbLivre === 31 && densidade === 28){
+                message = "Processo em risco"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura.\nSe não houver a normalização dos parâmetros, deve ser feito o descarte em Big Bags em uma hora"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar.\nSe não houver a normalização dos parâmetros, deve ser feito o descarte em Big Bags em uma hora"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade === 23){
+                message = "Processo em risco"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar.\nSe não houver a normalização dos parâmetros, deve ser feito o descarte em Big Bags em uma hora"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade === 27){
+                message = "Processo em risco"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura.\nSe não houver a normalização dos parâmetros, deve ser feito o descarte em Big Bags em uma hora"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade >24 && densidade <27){
+                message = "Processo em risco"
+                alertActions = "Diminuir o potênciometro .\nSe não houver a normalização dos parâmetros, deve ser feito o descarte em Big Bags em uma hora"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade === 28){//////////////////////////////////////////////////////////////////////////////////////////////////////
+                message = "Processo em risco"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura"
+            }else if(pbLivre === 30 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar"
+            }else if(pbLivre === 30 && densidade === 23){
+                message = "Processo em risco"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade === 27){
+                message = "Processo em risco"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 30 && densidade >24 && densidade <27){
+                message = "Processo em risco"
+                alertActions = "Diminuir o potênciometro"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 22 && densidade === 28){///////////////////////////////////////////////////////////////////////////////////////////////////////
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 22 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 22 && densidade === 23){
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 22 && densidade === 27){
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre === 22 && densidade >24 && densidade <27){
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >25 && pbLivre <30 && densidade === 28){///////////////////////////////////////////////////////////////////////////////////////////////////////
+                message = "Processo em risco"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >25 && pbLivre <30 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >25 && pbLivre <30 && densidade === 23){
+                message = "Processo em alerta"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar"
+            }else if(pbLivre >25 && pbLivre <30 && densidade === 27){
+                message = "Processo em alerta"
+                alertActions = "Baixar o potênciometro e aumentar a temperatura"
+            }else if(pbLivre >25 && pbLivre <30 && densidade >24 && densidade <26){
+                message = "Processo OK"
+            }else if(pbLivre >24 && pbLivre <28 && densidade === 28){///////////////////////////////////////////////////////////////////////////////////////////////////////
+                message = "Processo em risco"
+                alertActions = "Aumentar a temperatura e abir a janela para aumentar o arraste"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >24 && pbLivre <28 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Baixar a temperatura e fechar a janela para diminuir o arraste"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >24 && pbLivre <28 && densidade === 23){
+                message = "Processo em alerta"
+                alertActions = "Fechar a janela aumenta o arraste e baixa o potenciometro para o chumbo livre baixar"
+            }else if(pbLivre >24 && pbLivre <28 && densidade === 27){
+                message = "Processo em alerta"
+                alertActions = "Aumentar a temperatura e abir a janela para aumentar o arraste"
+            }else if(pbLivre >24 && pbLivre <28 && densidade >23 && densidade <27){
+                message = "Processo OK"
+            }else if(pbLivre >22 && pbLivre <25 && densidade === 28){///////////////////////////////////////////////////////////////////////////////////////////////////////
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >22 && pbLivre <25 && densidade === 22){
+                message = "Processo em risco"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+                displayTimer = true
+                timerDuration = 3600
+            }else if(pbLivre >22 && pbLivre <25 && densidade === 23){
+                message = "Processo em alerta"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+            }else if(pbLivre >22 && pbLivre <25 && densidade === 27){
+                message = "Processo em alerta"
+                alertActions = "Aumentar o potênciometro e baixar a temperatura"
+            }else if(pbLivre >22 && pbLivre <25 && densidade >23 && densidade <27){
+                message = "Processo em alerta"
+                alertActions = "Aumentar o potênciometro"
+            }
+
+            // Limpa os campos após salvar
+            document.getElementById('data').value = '';
+            document.getElementById('hora').value = '';
+            document.getElementById('pbLivre').value = '';
+            document.getElementById('densidade').value = '';
+        });
+
+        // Função do cronômetro
+        function startTimer(duration) {
+            let timer = duration, minutes, seconds;
+            const display = document.getElementById('timer');
+            display.style.display = 'block';
+ 
+            const interval = setInterval(function () {
+                minutes = parseInt(timer / 60, 10);
+                seconds = parseInt(timer % 60, 10);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                display.textContent = minutes + ":" + seconds;
+
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    display.textContent = "Tempo esgotado! Descartar óxido em big bags.";
+                }
+            }, 1000);
+        }
+    </script>
+
+</body>
+</html>

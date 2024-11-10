@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .search {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            margin: 5px;
+            width: 200px; /* largura dos campos de pesquisa */
+        }
+
+        .ok {
+            background-color: #c8e6c9; /* Verde claro para "OK" */
+        }
+
+        .atencao {
+            background-color: #fff59d; /* Amarelo para atenção */
+        }
+
+        .grave {
+            background-color: #ffccbc; /* Vermelho claro para grave */
+        }
+
+        .btn, #searchButton{
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn:hover, #searchButton:hover {
+            background-color: #0056b3; /* Cor ao passar o mouse */
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <h1>Histórico de Dados</h1>
+    <div class="search">
+        <input type="date" id="searchDate" placeholder="Pesquisar por data">
+        <input type="time" id="searchTime" placeholder="Pesquisar por hora">
+        <input type="text" id="searchSilo" placeholder="Pesquisar por silo">
+        <button id="searchButton">Buscar</button>
+    </div>
+    <table id="historicalTable">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Hora</th>
+                <th>%Pb-livre</th>
+                <th>Densidade</th>
+                <th>Silo</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="historicalDataBody"></tbody>
+    </table>
+    <a href="index.html" class="btn">Voltar</a>
+
+    <script>
+        function loadHistoricalData() {
+            const historicalData = JSON.parse(localStorage.getItem('historicalData')) || [];
+            const tbody = document.getElementById('historicalDataBody');
+            tbody.innerHTML = '';
+
+            historicalData.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.data}</td>
+                    <td>${entry.hora}</td>
+                    <td>${entry.pbLivre}</td>
+                    <td>${entry.densidade}</td>
+                    <td>${entry.silo}</td>
+                    <td class="${getStatusClass(entry)}">${getStatusMessage(entry)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getStatusClass(entry) {
+            if (entry.pbLivre > 30 || entry.densidade > 28) return 'grave';
+            if (entry.pbLivre <22 || entry.densidade <23) return 'grave';
+            if (entry.pbLivre === 30 || entry.densidade === 24) return 'atencao';
+            if (entry.pbLivre > 27 && entry.pbLivre <30 || entry.densidade === 23 || entry.densidade === 27) return 'atencao';
+            if (entry.pbLivre <24 && entry.pbLivre >=22 || entry.densidade === 23 || entry.densidade === 27) return 'atencao';
+            if (entry.pbLivre <22 && entry.densidade <22) return 'grave';
+            return 'ok'; // status normal
+        }
+
+        function getStatusMessage(entry){
+            if (entry.pbLivre > 30 || entry.densidade > 28) return 'Cronômetro iniciado, após uma hora descartar em Big Bags';
+            if (entry.pbLivre <22 || entry.densidade <23) return 'Cronômetro iniciado, após uma hora descartar em Big Bags';
+            if (entry.pbLivre === 30 || entry.densidade === 24) return 'Processo em risco! Atenção!';
+            if (entry.pbLivre > 27 && entry.pbLivre <30 || entry.densidade === 23 || entry.densidade === 27) return 'Processo em alerta!';
+            if (entry.pbLivre <24 && entry.pbLivre >=22 || entry.densidade === 23 || entry.densidade === 27) return 'Processo em alerta!';
+            if (entry.pbLivre <22 && entry.densidade <22) return 'Cronômetro iniciado, após uma hora descartar em Big Bags';
+            return 'Processo OK.';
+        }
+
+        document.getElementById('searchButton').addEventListener('click', function() {
+            const searchDate = document.getElementById('searchDate').value;
+            const searchTime = document.getElementById('searchTime').value;
+            const searchSilo = document.getElementById('searchSilo').value.toLowerCase();
+
+            const historicalData = JSON.parse(localStorage.getItem('historicalData')) || [];
+            const tbody = document.getElementById('historicalDataBody');
+            tbody.innerHTML = '';
+
+            historicalData.forEach(entry => {
+                const matchesDate = searchDate ? entry.data === searchDate : true;
+                const matchesTime = searchTime ? entry.hora === searchTime : true;
+                const matchesSilo = searchSilo ? entry.silo.toLowerCase().includes(searchSilo) : true;
+
+                if (matchesDate && matchesTime && matchesSilo) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.data}</td>
+                        <td>${entry.hora}</td>
+                        <td>${entry.pbLivre}</td>
+                        <td>${entry.densidade}</td>
+                        <td>${entry.silo}</td>
+                        <td class="${getStatusClass(entry)}">${getStatusMessage(entry)}</td>
+                    `;
+                    tbody.appendChild(row);
+                }
+            });
+        });
+
+        // Carrega os dados ao abrir a página
+        loadHistoricalData();
+    </script> 
+
+</body>
+</html>
